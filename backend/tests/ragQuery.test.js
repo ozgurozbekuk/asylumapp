@@ -10,21 +10,19 @@ test("buildChunkQuery excludes user uploads when user context is missing", () =>
   });
 });
 
-test("buildChunkQuery includes public sources + current user's uploads", () => {
+test("buildChunkQuery excludes user uploads even with user context", () => {
   const query = buildChunkQuery({ sector: "uk-asylum", sourceFilter: null, userId: "user_123" });
-  assert.equal(query.sector, "uk-asylum");
-  assert.deepEqual(query.$or, [
-    { "metadata.source": { $ne: "USER_UPLOAD" } },
-    { "metadata.userId": "user_123" },
-  ]);
+  assert.deepEqual(query, {
+    sector: "uk-asylum",
+    "metadata.source": { $ne: "USER_UPLOAD" },
+  });
 });
 
-test("buildChunkQuery restricts USER_UPLOAD filter to current user", () => {
+test("buildChunkQuery ignores USER_UPLOAD source filter while upload is disabled", () => {
   const query = buildChunkQuery({ sector: "uk-asylum", sourceFilter: "USER_UPLOAD", userId: "user_abc" });
   assert.deepEqual(query, {
     sector: "uk-asylum",
-    "metadata.source": "USER_UPLOAD",
-    "metadata.userId": "user_abc",
+    "metadata.source": { $ne: "USER_UPLOAD" },
   });
 });
 
@@ -35,4 +33,3 @@ test("buildChunkQuery keeps explicit non-user source filters unchanged", () => {
     "metadata.source": "GOV.UK",
   });
 });
-

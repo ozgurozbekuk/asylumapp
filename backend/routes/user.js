@@ -3,6 +3,7 @@ import { UserProfile } from "../models/UserProfile.js";
 import { asyncHandler } from "../middleware/asyncHandler.js";
 
 const router = express.Router();
+const PLAN_UPDATE_DISABLED_MESSAGE = "Plan updates are managed by billing/admin only.";
 
 // Get or create the signed-in user's profile (Clerk handles auth).
 router.get(
@@ -18,23 +19,11 @@ router.get(
   }),
 );
 
-// Update plan or basic profile details selected during Clerk sign-up.
+// Plan changes must not be client-controlled.
 router.patch(
   "/plan",
   asyncHandler(async (req, res) => {
-    const userId = req.auth.userId;
-    const { plan } = req.body || {};
-    if (!plan || !["free", "plus", "pro"].includes(plan)) {
-      return res.status(400).json({ message: "Plan must be 'free', 'plus' or 'pro'" });
-    }
-
-    const profile = await UserProfile.findOneAndUpdate(
-      { userId },
-      { $set: { plan } },
-      { upsert: true, new: true },
-    ).lean();
-
-    res.json({ profile });
+    return res.status(403).json({ message: PLAN_UPDATE_DISABLED_MESSAGE });
   }),
 );
 
@@ -43,17 +32,13 @@ router.post(
   "/sync",
   asyncHandler(async (req, res) => {
     const userId = req.auth.userId;
-    const { email, name, plan, metadata } = req.body || {};
+    const { email, name, metadata } = req.body || {};
 
     const updates = {
       ...(email ? { email } : {}),
       ...(name ? { name } : {}),
       ...(metadata ? { metadata } : {}),
     };
-
-    if (plan && ["free", "plus", "pro"].includes(plan)) {
-      updates.plan = plan;
-    }
 
     const profile = await UserProfile.findOneAndUpdate(
       { userId },

@@ -4,8 +4,6 @@ import { Link } from 'react-router-dom';
 import { Toaster, toast } from 'react-hot-toast';
 import { apiRequest } from '../../api/client';
 
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000').replace(/\/$/, '');
-
 const memoryCache = new Map();
 const sessionMessagesCache = new Map();
 const getGlobalCache = () => {
@@ -53,17 +51,17 @@ const Sidebar = ({ sessions, activeSessionId, onSelect, onDelete, isLoading, t }
           {sessions.map((item) => {
             const isActive = item._id === activeSessionId;
             return (
-              <button
+              <div
                 key={item._id}
-                type="button"
-                onClick={() => onSelect(item._id)}
                 className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-sm font-semibold transition ${
                   isActive
                     ? 'bg-[#1f222b] text-slate-100'
                     : 'text-slate-400 hover:bg-[#171a21] hover:text-slate-100'
                 }`}
               >
-                <span className="truncate">{item.title || t.currentSession}</span>
+                <button type="button" onClick={() => onSelect(item._id)} className="min-w-0 flex-1 truncate text-left">
+                  {item.title || t.currentSession}
+                </button>
                 <button
                   type="button"
                   onClick={(event) => {
@@ -83,7 +81,7 @@ const Sidebar = ({ sessions, activeSessionId, onSelect, onDelete, isLoading, t }
                     />
                   </svg>
                 </button>
-              </button>
+              </div>
             );
           })}
         </div>
@@ -326,33 +324,12 @@ const MessageList = ({ messages, citations, userLabel, assistantLabel, isTyping,
   </div>
 );
 
-const SuggestionChips = ({ items, onSelect }) => (
-  <div className="mx-auto flex w-full max-w-[780px] flex-wrap justify-center gap-2 px-4">
-    {items.map((item) => (
-      <button
-        key={item}
-        type="button"
-        onClick={() => onSelect(item)}
-        className="inline-flex items-center gap-2 rounded-full border border-[#2a2d36] bg-[#151821] px-4 py-2 text-sm font-semibold text-slate-200 transition hover:border-[#3a3d47]"
-      >
-        <span className="text-emerald-300">●</span>
-        {item}
-      </button>
-    ))}
-  </div>
-);
-
 const Composer = ({
   input,
   onChange,
   onSend,
   isLoading,
-  onAttach,
-  canAttach,
-  onBlockedAttach,
   placeholder,
-  pendingFile,
-  onRemoveFile,
   t,
 }) => {
   const textareaRef = useRef(null);
@@ -364,42 +341,11 @@ const Composer = ({
   }, [input]);
 
   return (
-    <div className="pointer-events-none fixed bottom-0 left-0 right-0 z-30 bg-[#0f1115]">
+    <div className="pointer-events-none fixed bottom-9 left-0 right-0 z-30 bg-[#0f1115]">
       <div className="w-full max-w-[1400px] px-4 pb-3 lg:pl-[260px]">
         <div className="mx-auto w-full max-w-[780px]">
-        {pendingFile ? (
-          <div className="pointer-events-auto mb-3 flex items-center justify-between rounded-2xl border border-emerald-400/60 bg-[#13211d] px-4 py-2 text-sm font-semibold text-emerald-200">
-            <span className="truncate">{pendingFile.name}</span>
-            <button
-              type="button"
-              onClick={onRemoveFile}
-              className="rounded-full border border-emerald-400/60 bg-[#1f222b] px-2 py-1 text-xs font-semibold text-emerald-200 transition hover:border-emerald-400"
-            >
-              {t.removeAttachment}
-            </button>
-          </div>
-        ) : null}
         <div className="pointer-events-auto rounded-[28px] border border-[#2a2d36] bg-[#171a21] px-3 py-1 shadow-[0_10px_30px_-20px_rgba(0,0,0,0.8)]">
           <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => (canAttach ? onAttach() : onBlockedAttach?.())}
-              className={`flex h-8 w-8 items-center justify-center rounded-full border transition ${
-                canAttach
-                  ? 'border-[#2a2d36] bg-[#111319] text-slate-300 hover:border-[#3a3d47]'
-                  : 'cursor-not-allowed border-[#2a2d36] bg-[#111319] text-slate-600'
-              }`}
-              aria-label={t.uploadButton}
-            >
-              <svg viewBox="0 0 20 20" fill="none" className="h-4 w-4">
-                <path
-                  d="M10 4v12m-6-6h12"
-                  stroke="currentColor"
-                  strokeWidth="1.6"
-                  strokeLinecap="round"
-                />
-              </svg>
-            </button>
             <textarea
               ref={textareaRef}
               value={input}
@@ -416,9 +362,9 @@ const Composer = ({
             <button
               type="button"
               onClick={() => onSend()}
-              disabled={isLoading || (!input.trim() && !pendingFile)}
+              disabled={isLoading || !input.trim()}
               className={`flex h-8 w-8 items-center justify-center rounded-full transition ${
-                isLoading || (!input.trim() && !pendingFile)
+                isLoading || !input.trim()
                   ? 'bg-[#22242b] text-slate-600'
                   : 'bg-[#10a37f] text-white hover:bg-emerald-500'
               }`}
@@ -455,14 +401,6 @@ const Chat = () => {
   const CACHE_TTL_MS = 5 * 60 * 1000;
   const [language, setLanguage] = useState('tr');
   const [officialOnly, setOfficialOnly] = useState(false);
-  const [documents, setDocuments] = useState([]);
-  const [selectedDocId, setSelectedDocId] = useState(null);
-  const [analysis, setAnalysis] = useState(null);
-  const [userPlan, setUserPlan] = useState('free');
-  const [activeInsightTab, setActiveInsightTab] = useState('explain');
-  const [isUploading, setIsUploading] = useState(false);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [pendingFile, setPendingFile] = useState(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const translations = useMemo(
     () => ({
@@ -588,7 +526,7 @@ const Chat = () => {
             id: 'm-1',
             role: 'assistant',
             content:
-              'Merhaba. Siginma dosyaniz ve gocmenlik sorulariniz konusunda yardim etmek icin buradayim.\n\nBelgeleri anlamaniza, mulakatlara hazirlanmaniza veya surecinizin bir sonraki adimlarini aciklamaya yardim edebilirim. Size nasil yardimci olabilirim?',
+              'Merhaba. Siginma dosyaniz ve gocmenlik sorulariniz konusunda yardim etmek icin buradayim.',
           },
         ],
       },
@@ -612,10 +550,8 @@ const Chat = () => {
   const hasHydratedRef = useRef(false);
   const lastLanguageRef = useRef(language);
   const hasServerSnapshotRef = useRef(false);
-  const fileInputRef = useRef(null);
-
-  const quickReplies = useMemo(() => t.quickReplies, [t]);
-  const canUploadDocuments = userPlan !== 'free';
+  const latestSessionsRef = useRef([]);
+  const latestInitialMessagesRef = useRef(initialMessages);
 
   const disclaimer = t.disclaimer;
   const activeSession = useMemo(
@@ -623,115 +559,13 @@ const Chat = () => {
     [sessions, activeSessionId],
   );
 
-  const loadDocuments = async () => {
-    try {
-      const response = await apiRequest({
-        path: '/api/documents',
-        getToken,
-        userId,
-      });
-      const docs = response?.documents || [];
-      setDocuments(docs);
-      if (docs.length && !selectedDocId) {
-        setSelectedDocId(docs[0]._id);
-      }
-      return docs;
-    } catch (err) {
-      // If the user is not authorized (e.g. token issue), don't spam the console or crash effects.
-      // Chat can still work without document features.
-      // Optionally, you could surface a toast here if you want.
-      console.warn('Failed to load documents:', err?.message || err);
-      return [];
-    }
-  };
+  useEffect(() => {
+    latestSessionsRef.current = sessions;
+  }, [sessions]);
 
-  const loadUserPlan = async () => {
-    try {
-      const response = await apiRequest({
-        path: '/api/user/me',
-        getToken,
-        userId,
-      });
-      const plan = response?.profile?.plan;
-      setUserPlan(plan === 'free' ? 'free' : 'plus');
-    } catch (err) {
-      setUserPlan('free');
-    }
-  };
-
-  const uploadDocument = async (file) => {
-    if (!file) return false;
-    if (!canUploadDocuments) {
-      toast.error(t.uploadPlanLocked);
-      return false;
-    }
-    setIsUploading(true);
-    try {
-      const token = typeof getToken === 'function' ? await getToken() : null;
-      const formData = new FormData();
-      formData.append('file', file);
-
-      const response = await fetch(`${API_BASE_URL}/api/documents/upload`, {
-        method: 'POST',
-        headers: {
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-          ...(userId ? { 'x-clerk-user-id': userId } : {}),
-        },
-        body: formData,
-      });
-
-      if (!response.ok) {
-        const payload = await response.json().catch(() => ({}));
-        throw new Error(payload?.message || t.uploadError);
-      }
-
-      await loadDocuments();
-      toast.success(t.uploadSuccess);
-      return true;
-    } catch (err) {
-      toast.error(err?.message || t.uploadError);
-      return false;
-    } finally {
-      setIsUploading(false);
-    }
-  };
-
-  const deleteDocument = async (docId) => {
-    try {
-      await apiRequest({
-        path: `/api/documents/${docId}`,
-        method: 'DELETE',
-        getToken,
-        userId,
-      });
-      setDocuments((prev) => prev.filter((doc) => doc._id !== docId));
-      if (selectedDocId === docId) {
-        setSelectedDocId(null);
-        setAnalysis(null);
-      }
-      toast.success(t.deleteSuccess);
-    } catch (err) {
-      toast.error(err?.message || t.deleteError);
-    }
-  };
-
-  const analyzeDocument = async (docId) => {
-    if (!docId) return;
-    setIsAnalyzing(true);
-    try {
-      const response = await apiRequest({
-        path: `/api/documents/${docId}/analyze`,
-        method: 'POST',
-        getToken,
-        userId,
-      });
-      setAnalysis(response?.analysis || null);
-    } catch (err) {
-      toast.error(err?.message || t.analyzeError);
-    } finally {
-      setIsAnalyzing(false);
-    }
-  };
+  useEffect(() => {
+    latestInitialMessagesRef.current = initialMessages;
+  }, [initialMessages]);
 
   const cacheKey = userId ? `chatCache:${userId}` : null;
   const loadMemoryCache = () => {
@@ -856,7 +690,7 @@ const Chat = () => {
     const explicitText = typeof text === 'string' ? text.trim() : '';
     const currentInput = typeof input === 'string' ? input.trim() : '';
     const value = explicitText || currentInput;
-    if ((!value && !pendingFile) || isLoading) return;
+    if (!value || isLoading) return;
 
     setError(null);
     if (value) {
@@ -866,14 +700,6 @@ const Chat = () => {
     setIsLoading(true);
 
     try {
-      if (pendingFile) {
-        const ok = await uploadDocument(pendingFile);
-        if (!ok) {
-          setIsLoading(false);
-          return;
-        }
-        setPendingFile(null);
-      }
       const sessionId = activeSessionId || (await createSession());
       if (!sessionId) return;
 
@@ -938,33 +764,22 @@ const Chat = () => {
     const initSessions = async () => {
       setIsSessionsLoading(true);
       try {
-        await loadUserPlan();
         const cached = loadMemoryCache() || loadCache(sessionStorage) || loadCache(localStorage);
         const cachedSessions = Array.isArray(cached?.sessions) ? cached.sessions : [];
         if (cached && cachedSessions.length > 0) {
           setSessions(cachedSessions);
-          setActiveSessionId(cached.activeSessionId || null);
-          if (cached.activeSessionId && cached.sessionMessages?.[cached.activeSessionId]?.length) {
-            const cachedMessages = cached.sessionMessages[cached.activeSessionId];
-            setMessages(cachedMessages);
-            sessionMessagesCache.set(cached.activeSessionId, cachedMessages);
-          } else {
-            setMessages(cached.messages?.length ? cached.messages : initialMessages);
-          }
+          setActiveSessionId(null);
+          setMessages(initialMessages);
           hasServerSnapshotRef.current = Boolean(cached.hasServerSnapshot);
           setIsSessionsLoading(false);
           hasHydratedRef.current = true;
           return;
         }
 
-        const loadedSessions = await loadSessions();
+        await loadSessions();
         if (!isActive) return;
-        if (loadedSessions.length) {
-          await loadSession(loadedSessions[0]._id);
-        } else {
-          setMessages(initialMessages);
-          setActiveSessionId(null);
-        }
+        setMessages(initialMessages);
+        setActiveSessionId(null);
       } catch (err) {
         if (isActive) {
           setError(err?.message || 'Failed to load conversations.');
@@ -985,9 +800,31 @@ const Chat = () => {
   }, [userId]);
 
   useEffect(() => {
-    if (canUploadDocuments) return;
-    setPendingFile(null);
-  }, [canUploadDocuments]);
+    return () => {
+      // Leaving chat page should reset active conversation context for next visit.
+      if (!cacheKey) return;
+      const resetPayload = {
+        timestamp: Date.now(),
+        sessions: latestSessionsRef.current || [],
+        activeSessionId: null,
+        messages: latestInitialMessagesRef.current || [],
+        sessionMessages: {},
+        hasServerSnapshot: hasServerSnapshotRef.current,
+      };
+      memoryCache.set(cacheKey, resetPayload);
+      const globalCache = getGlobalCache();
+      if (globalCache) {
+        globalCache[cacheKey] = resetPayload;
+      }
+      try {
+        const serialized = JSON.stringify(resetPayload);
+        localStorage.setItem(cacheKey, serialized);
+        sessionStorage.setItem(cacheKey, serialized);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+  }, [cacheKey]);
 
   useEffect(() => {
     if (!hasHydratedRef.current || !activeSessionId || !userId) return;
@@ -1039,16 +876,6 @@ const Chat = () => {
       container.removeEventListener('scroll', handleScroll);
     };
   }, []);
-
-  useEffect(() => {
-    if (userId) {
-      loadDocuments();
-    }
-  }, [userId]);
-
-  useEffect(() => {
-    setAnalysis(null);
-  }, [selectedDocId]);
 
   return (
     <ChatLayout
@@ -1174,19 +1001,13 @@ const Chat = () => {
                 {disclaimer}
               </div>
             </div>
+            <p className="mb-5 text-center text-xs text-slate-500">
+              Not legal advice.{' '}
+              <Link to="/disclaimer" className="font-semibold text-slate-300 underline underline-offset-2 hover:text-slate-100">
+                See Disclaimer.
+              </Link>
+            </p>
           </div>
-
-          {messages.length <= 1 ? (
-            <div className="mb-6">
-              <SuggestionChips
-                items={quickReplies}
-                onSelect={(label) => {
-                  setInput(label);
-                  handleSend(label);
-                }}
-              />
-            </div>
-          ) : null}
 
           <MessageList
             messages={messages}
@@ -1223,27 +1044,8 @@ const Chat = () => {
         onChange={setInput}
         onSend={handleSend}
         isLoading={isLoading}
-        onAttach={() => fileInputRef.current?.click()}
-        canAttach={canUploadDocuments}
-        onBlockedAttach={() => toast.error(t.uploadPlanLocked)}
         placeholder={t.inputPlaceholder}
-        pendingFile={pendingFile}
-        onRemoveFile={() => setPendingFile(null)}
         t={t}
-      />
-      <input
-        ref={fileInputRef}
-        type="file"
-        className="hidden"
-        accept=".pdf,.txt,application/pdf,text/plain"
-        onChange={(event) => {
-          if (!canUploadDocuments) {
-            toast.error(t.uploadPlanLocked);
-            setPendingFile(null);
-            return;
-          }
-          setPendingFile(event.target.files?.[0] || null);
-        }}
       />
     </ChatLayout>
   );

@@ -4,6 +4,10 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Chat from './pages/chat/Chat';
 import Home from './pages/landingpage/Home';
 import { SignInPage, SignUpPage } from './pages/auth/AuthPage';
+import PrivacyPolicyPage from './pages/legal/PrivacyPolicyPage';
+import TermsOfServicePage from './pages/legal/TermsOfServicePage';
+import DisclaimerPage from './pages/legal/DisclaimerPage';
+import LegalFooter from './components/LegalFooter';
 
 const ProtectedRoute = ({ children }) => (
   <>
@@ -29,6 +33,9 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route path="/privacy" element={<PrivacyPolicyPage />} />
+        <Route path="/terms" element={<TermsOfServicePage />} />
+        <Route path="/disclaimer" element={<DisclaimerPage />} />
         <Route
           path="/login/*"
           element={
@@ -56,6 +63,7 @@ function App() {
           }
         />
       </Routes>
+      <LegalFooter />
     </BrowserRouter>
   );
 }

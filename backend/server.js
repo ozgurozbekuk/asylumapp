@@ -3,9 +3,7 @@ import dotenv from "dotenv";
 import { connectDb } from "./config/db.js";
 import chatRoutes from "./routes/chat.js";
 import userRoutes from "./routes/user.js";
-import ragRoutes from "./routes/ragRoutes.js";
 import adminRoutes from "./routes/admin.js";
-import documentRoutes from "./routes/documents.js";
 import waitlistRoutes from "./routes/waitlist.js";
 import { requireAuth, requireAdmin } from "./middleware/auth.js";
 import { requestLogger } from "./middleware/logger.js";
@@ -80,8 +78,6 @@ app.get("/health", (req, res) => {
 app.use("/api/waitlist", waitlistRoutes);
 app.use("/api/chat", requireAuth, resolveUserPlan, chatRoutes);
 app.use("/api/user", requireAuth, resolveUserPlan, userRoutes);
-app.use("/api/chat", requireAuth, resolveUserPlan, ragRoutes);
-app.use("/api", requireAuth, resolveUserPlan, documentRoutes);
 app.use("/api/admin", requireAdmin, adminRoutes);
 
 // Basic error handler.

@@ -9,6 +9,7 @@ const content = {
     nav: {
       brand: 'Asylum Assistant',
       chat: 'Chat',
+      support: 'Buy Me Coffee',
       login: 'Log in',
       register: 'Register',
       logout: 'Log out',
@@ -94,6 +95,8 @@ const content = {
     ],
     footer: {
       links: ['Privacy Policy', 'Terms of Service', 'Full Disclaimer'],
+      supportLabel: 'Buy Me Coffee',
+      supportUrl: 'https://buymeacoffee.com/rojwebdesign',
       disclaimer:
         'Asylum Assistant is an informational tool designed to help users understand the UK asylum process. We are not a law firm and do not provide legal advice. Using this site does not create a solicitor-client relationship. For legal advice regarding your case, please consult a qualified immigration solicitor or OISC-registered advisor.',
       copyrightSuffix: 'Asylum Assistant. All rights reserved.',
@@ -108,6 +111,7 @@ const content = {
     nav: {
       brand: 'Asylum Assistant',
       chat: 'Sohbet',
+      support: 'Bir Kahve Al',
       login: 'Giriş yap',
       register: 'Kayıt ol',
       logout: 'Çıkış yap',
@@ -193,6 +197,8 @@ const content = {
     ],
     footer: {
       links: ['Gizlilik Politikası', 'Hizmet Şartları', 'Tüm Feragatname'],
+      supportLabel: 'Bir Kahve Al',
+      supportUrl: 'https://buymeacoffee.com/rojwebdesign',
       disclaimer:
         'Asylum Assistant, kullanıcıların Birleşik Krallık iltica sürecini anlamalarına yardımcı olmak için tasarlanmış bilgi amaçlı bir araçtır. Bir hukuk bürosu değiliz ve hukuki tavsiye vermeyiz. Bu siteyi kullanmak avukat-müvekkil ilişkisi oluşturmaz. Özel durumun için nitelikli bir göçmenlik avukatına veya OISC kayıtlı bir danışmana başvur.',
       copyrightSuffix: 'Asylum Assistant. Tüm hakları saklıdır.',
@@ -215,11 +221,11 @@ const Home = ({ language = 'tr', setLanguage = () => {} }) => {
   ];
 
   return (
-    <div className="min-h-screen bg-[#f9fbf7] text-slate-900">
-      <nav className="sticky top-0 z-40 border-b border-slate-200/70 bg-white/80 backdrop-blur">
-        <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-5 py-4">
-          <Link to="/" className="flex items-center gap-2 text-lg font-semibold text-slate-900">
-            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
+    <div className="min-h-screen bg-[#0f1115] text-slate-100">
+      <nav className="sticky top-0 z-40 border-b border-[#1e2026] bg-[#0f1115]/85 backdrop-blur">
+        <div className="relative mx-auto flex w-full max-w-6xl items-center justify-between px-5 py-4">
+          <Link to="/" className="flex items-center gap-2 text-lg font-semibold text-slate-100">
+            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#151821] text-emerald-300">
               <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" aria-hidden="true">
                 <path
                   d="M12 4v16m0 0 4-4m-4 4-4-4"
@@ -233,11 +239,20 @@ const Home = ({ language = 'tr', setLanguage = () => {} }) => {
             {t.nav.brand}
           </Link>
 
+          <a
+            href={t.footer.supportUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="absolute left-1/2 hidden -translate-x-1/2 rounded-full bg-amber-200 px-4 py-2 text-sm font-semibold text-amber-900 shadow-sm transition hover:bg-amber-300 sm:inline-flex"
+          >
+            {t.nav.support}
+          </a>
+
           <div className="flex items-center gap-3">
             <button
               type="button"
               onClick={() => setMobileMenuOpen(true)}
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:border-slate-300 hover:shadow sm:hidden"
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-[#2a2d36] bg-[#151821] text-slate-300 shadow-sm transition hover:border-[#3a3d47] hover:shadow sm:hidden"
               aria-label="Open menu"
             >
               <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5">
@@ -251,7 +266,7 @@ const Home = ({ language = 'tr', setLanguage = () => {} }) => {
             </button>
             <Link
               to="/chat"
-              className="hidden text-sm font-semibold text-slate-700 transition hover:text-slate-900 sm:inline"
+              className="hidden text-sm font-semibold text-slate-300 transition hover:text-slate-100 sm:inline"
             >
               {t.nav.chat}
             </Link>
@@ -259,10 +274,10 @@ const Home = ({ language = 'tr', setLanguage = () => {} }) => {
               <button
                 type="button"
                 onClick={() => setLanguageMenuOpen((prev) => !prev)}
-                className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-800 shadow-sm transition hover:border-slate-300 hover:shadow"
+                className="flex items-center gap-2 rounded-full border border-[#2a2d36] bg-[#151821] px-3 py-2 text-sm font-semibold text-slate-200 shadow-sm transition hover:border-[#3a3d47] hover:shadow"
                 aria-expanded={languageMenuOpen}
               >
-                <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4 text-slate-600" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4 text-slate-400" aria-hidden="true">
                   <path
                     d="M4 12h16M12 4v16m-6-3c2.5 2 5.5 2 8 0m-8-10c2.5-2 5.5-2 8 0"
                     stroke="currentColor"
@@ -277,7 +292,7 @@ const Home = ({ language = 'tr', setLanguage = () => {} }) => {
                 </svg>
               </button>
               {languageMenuOpen && (
-                <div className="absolute right-0 mt-2 w-36 rounded-2xl border border-slate-100 bg-white p-1 text-sm shadow-lg">
+                <div className="absolute right-0 mt-2 w-36 rounded-2xl border border-[#2a2d36] bg-[#151821] p-1 text-sm shadow-lg">
                   {languageOptions.map(({ code, label }) => (
                     <button
                       key={code}
@@ -286,8 +301,8 @@ const Home = ({ language = 'tr', setLanguage = () => {} }) => {
                         setLanguage(code);
                         setLanguageMenuOpen(false);
                       }}
-                      className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-left transition hover:bg-slate-50 ${
-                        language === code ? 'bg-slate-100 font-semibold text-slate-900' : 'text-slate-700'
+                      className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-left transition hover:bg-[#1f222b] ${
+                        language === code ? 'bg-[#1f222b] font-semibold text-slate-100' : 'text-slate-300'
                       }`}
                     >
                       {label}
@@ -309,13 +324,13 @@ const Home = ({ language = 'tr', setLanguage = () => {} }) => {
             <SignedOut>
               <Link
                 to="/login"
-                className="hidden text-sm font-semibold text-slate-700 transition hover:text-slate-900 sm:inline"
+                className="hidden text-sm font-semibold text-slate-300 transition hover:text-slate-100 sm:inline"
               >
                 {t.nav.login}
               </Link>
               <Link
                 to="/register"
-                className="hidden rounded-full border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-800 shadow-sm transition hover:border-slate-300 hover:shadow sm:inline"
+                className="hidden rounded-full border border-[#2a2d36] bg-[#151821] px-3 py-2 text-sm font-semibold text-slate-200 shadow-sm transition hover:border-[#3a3d47] hover:shadow sm:inline"
               >
                 {t.nav.register}
               </Link>
@@ -326,13 +341,13 @@ const Home = ({ language = 'tr', setLanguage = () => {} }) => {
 
       {mobileMenuOpen ? (
         <div className="fixed inset-0 z-50 bg-black/40 sm:hidden">
-          <div className="absolute right-0 top-0 h-full w-[280px] bg-white px-5 py-6 shadow-2xl">
+          <div className="absolute right-0 top-0 h-full w-[280px] bg-[#0b0d12] px-5 py-6 shadow-2xl">
             <div className="flex items-center justify-between">
-              <span className="text-sm font-semibold text-slate-900">{t.nav.brand}</span>
+              <span className="text-sm font-semibold text-slate-100">{t.nav.brand}</span>
               <button
                 type="button"
                 onClick={() => setMobileMenuOpen(false)}
-                className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 text-slate-700"
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-[#2a2d36] text-slate-300"
                 aria-label="Close menu"
               >
                 ✕
@@ -342,24 +357,33 @@ const Home = ({ language = 'tr', setLanguage = () => {} }) => {
               <Link
                 to="/"
                 onClick={() => setMobileMenuOpen(false)}
-                className="block rounded-xl border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-800"
+                className="block rounded-xl border border-[#2a2d36] bg-[#151821] px-3 py-2 text-sm font-semibold text-slate-200"
               >
                 {t.nav.brand}
               </Link>
               <Link
                 to="/chat"
                 onClick={() => setMobileMenuOpen(false)}
-                className="block rounded-xl border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-800"
+                className="block rounded-xl border border-[#2a2d36] bg-[#151821] px-3 py-2 text-sm font-semibold text-slate-200"
               >
                 {t.nav.chat}
               </Link>
+              <a
+                href={t.footer.supportUrl}
+                target="_blank"
+                rel="noreferrer"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block rounded-xl bg-amber-200 px-3 py-2 text-sm font-semibold text-amber-900 shadow-sm transition hover:bg-amber-300"
+              >
+                {t.nav.support}
+              </a>
               <SignedIn>
-                <div className="flex items-center gap-3 rounded-xl border border-slate-200 px-3 py-2">
+                <div className="flex items-center gap-3 rounded-xl border border-[#2a2d36] bg-[#151821] px-3 py-2">
                   <UserButton appearance={{ elements: { avatarBox: 'h-10 w-10' } }} afterSignOutUrl="/" />
                   <SignOutButton>
                     <button
                       type="button"
-                      className="rounded-full border border-slate-200 bg-white px-3 py-1 text-sm font-semibold text-slate-700"
+                      className="rounded-full border border-[#2a2d36] bg-[#0f1115] px-3 py-1 text-sm font-semibold text-slate-200"
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       {t.nav.logout}
@@ -373,7 +397,7 @@ const Home = ({ language = 'tr', setLanguage = () => {} }) => {
                   setLanguage(language === 'en' ? 'tr' : 'en');
                   setMobileMenuOpen(false);
                 }}
-                className="block w-full rounded-xl border border-slate-200 px-3 py-2 text-left text-sm font-semibold text-slate-800"
+                className="block w-full rounded-xl border border-[#2a2d36] bg-[#151821] px-3 py-2 text-left text-sm font-semibold text-slate-200"
               >
                 {language === 'en' ? 'TR' : 'EN'}
               </button>
@@ -381,14 +405,14 @@ const Home = ({ language = 'tr', setLanguage = () => {} }) => {
                 <Link
                   to="/login"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="block rounded-xl border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-800"
+                  className="block rounded-xl border border-[#2a2d36] bg-[#151821] px-3 py-2 text-sm font-semibold text-slate-200"
                 >
                   {t.nav.login}
                 </Link>
                 <Link
                   to="/register"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="block rounded-xl border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-800"
+                  className="block rounded-xl border border-[#2a2d36] bg-[#151821] px-3 py-2 text-sm font-semibold text-slate-200"
                 >
                   {t.nav.register}
                 </Link>
@@ -398,10 +422,10 @@ const Home = ({ language = 'tr', setLanguage = () => {} }) => {
         </div>
       ) : null}
 
-      <main className="flex min-h-screen w-full flex-col items-center px-5 pb-20">
+      <main className="flex min-h-screen w-full flex-col items-center px-5 pb-24">
         <section className="mt-16 w-full max-w-5xl text-center">
-          <div className="mx-auto flex w-fit items-center gap-2 rounded-full bg-emerald-50 px-4 py-2 text-xs font-semibold text-emerald-700 shadow-sm">
-            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white text-emerald-600 shadow">
+          <div className="mx-auto flex w-fit items-center gap-2 rounded-full bg-[#151821] px-4 py-2 text-xs font-semibold text-emerald-300 shadow-sm">
+            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#1f222b] text-emerald-300 shadow">
               <svg viewBox="0 0 20 20" fill="none" className="h-3.5 w-3.5" aria-hidden="true">
                 <path
                   d="m10 3.5 1.5 3.5 3.5.5-2.6 2.6.6 3.6L10 12.5l-3 1.2.6-3.6-2.6-2.6 3.5-.5L10 3.5Z"
@@ -414,10 +438,10 @@ const Home = ({ language = 'tr', setLanguage = () => {} }) => {
             </span>
             {t.hero.badge}
           </div>
-          <h1 className="mt-6 text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl">
+          <h1 className="mt-6 text-4xl font-extrabold tracking-tight text-slate-100 sm:text-5xl">
             {t.hero.title}
           </h1>
-          <p className="mx-auto mt-5 max-w-3xl text-lg leading-relaxed text-slate-700">{t.hero.subtitle}</p>
+          <p className="mx-auto mt-5 max-w-3xl text-lg leading-relaxed text-slate-300">{t.hero.subtitle}</p>
           <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <Link
               to="/chat"
@@ -435,20 +459,20 @@ const Home = ({ language = 'tr', setLanguage = () => {} }) => {
             </Link>
             <a
               href="#how-it-works"
-              className="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-6 py-3 text-base font-semibold text-slate-800 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow"
+              className="inline-flex items-center justify-center rounded-full border border-[#2a2d36] bg-[#151821] px-6 py-3 text-base font-semibold text-slate-200 shadow-sm transition hover:-translate-y-0.5 hover:border-[#3a3d47] hover:shadow"
             >
               {t.hero.secondaryCta}
             </a>
           </div>
-          <p className="mt-6 flex items-center justify-center gap-2 text-xs font-medium text-slate-500">
-            <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-slate-200 text-[10px] font-semibold text-slate-700">
+          <p className="mt-6 flex items-center justify-center gap-2 text-xs font-medium text-slate-400">
+            <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#1f222b] text-[10px] font-semibold text-slate-300">
               !
             </span>
             {t.hero.note}
           </p>
         </section>
 
-        <section className="mt-16 w-full max-w-6xl rounded-[28px] border border-slate-100 bg-white p-4 shadow-[0_20px_50px_-35px_rgba(0,0,0,0.4)]">
+        <section className="mt-16 w-full max-w-6xl rounded-[28px] border border-[#1e2026] bg-[#111319] p-4 shadow-[0_20px_50px_-35px_rgba(0,0,0,0.6)]">
           <div className="relative overflow-hidden rounded-[24px]">
             <img
               src={t.highlight.image}
@@ -457,7 +481,7 @@ const Home = ({ language = 'tr', setLanguage = () => {} }) => {
               loading="lazy"
             />
             <div className="absolute left-4 bottom-4 sm:left-6 sm:bottom-6">
-              <div className="flex max-w-xs items-start gap-3 rounded-full bg-white/90 px-4 py-3 shadow-lg backdrop-blur sm:rounded-[24px]">
+              <div className="flex max-w-xs items-start gap-3 rounded-full bg-[#151821]/95 px-4 py-3 shadow-lg backdrop-blur sm:rounded-[24px]">
                 <span className="mt-0.5 flex h-9 w-9 items-center justify-center rounded-full bg-amber-200 text-amber-800">
                   <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden="true">
                     <path
@@ -470,8 +494,8 @@ const Home = ({ language = 'tr', setLanguage = () => {} }) => {
                   </svg>
                 </span>
                 <div>
-                  <p className="text-sm font-semibold text-slate-900">{t.highlight.title}</p>
-                  <p className="text-xs text-slate-600">{t.highlight.body}</p>
+                  <p className="text-sm font-semibold text-slate-100">{t.highlight.title}</p>
+                  <p className="text-xs text-slate-300">{t.highlight.body}</p>
                 </div>
               </div>
             </div>
@@ -483,29 +507,34 @@ const Home = ({ language = 'tr', setLanguage = () => {} }) => {
             {t.features.map(({ iconBg, icon, title, body }) => (
               <div
                 key={title}
-                className="flex h-full flex-col gap-3 rounded-[24px] border border-slate-100 bg-white px-6 py-7 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+                className="flex h-full flex-col gap-3 rounded-[24px] border border-[#1e2026] bg-[#151821] px-6 py-7 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
               >
                 <div className={`flex h-10 w-10 items-center justify-center rounded-full ${iconBg}`}>{icon}</div>
-                <h3 className="text-lg font-semibold text-slate-900">{title}</h3>
-                <p className="text-sm leading-relaxed text-slate-700">{body}</p>
+                <h3 className="text-lg font-semibold text-slate-100">{title}</h3>
+                <p className="text-sm leading-relaxed text-slate-300">{body}</p>
               </div>
             ))}
           </div>
         </section>
 
-        <footer className="mt-20 w-full border-t border-slate-200 pt-8">
-          <p className="mb-4 text-center text-xs font-semibold text-slate-700">
+        <footer className="mt-20 w-full border-t border-[#1e2026] pt-8">
+          <p className="mb-4 text-center text-xs font-semibold text-slate-300">
             {t.footer.infoSupportLine1}
             <br />
             {t.footer.infoSupportLine2}
           </p>
-          <div className="flex flex-col items-center gap-3 text-sm font-semibold text-slate-700 sm:flex-row sm:justify-center sm:gap-6">
-            {t.footer.links.map((link) => (
-              <span key={link}>{link}</span>
-            ))}
+          <div className="flex flex-col items-center gap-3 text-sm font-semibold text-slate-300 sm:flex-row sm:justify-center sm:gap-6">
+            <a
+              href={t.footer.supportUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="rounded-full border border-[#2a2d36] bg-[#151821] px-3 py-1.5 text-sm font-semibold text-slate-200 transition hover:border-[#3a3d47] hover:shadow"
+            >
+              {t.footer.supportLabel}
+            </a>
           </div>
-          <div className="mx-auto mt-6 max-w-3xl rounded-2xl bg-slate-50 px-5 py-4 text-center text-[11px] leading-relaxed text-slate-600 shadow-inner">
-            <span className="font-semibold text-slate-800">Important Disclaimer:</span> {t.footer.disclaimer}
+          <div className="mx-auto mt-6 max-w-3xl rounded-2xl bg-[#151821] px-5 py-4 text-center text-[11px] leading-relaxed text-slate-300 shadow-inner">
+            <span className="font-semibold text-slate-100">Important Disclaimer:</span> {t.footer.disclaimer}
           </div>
           <p className="mt-4 text-center text-xs text-slate-500">
             Contains public sector information licensed under the Open Government Licence v3.0.
