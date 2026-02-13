@@ -1,0 +1,9 @@
+{
+  "content_id": "sample-content-id",
+  "title": "Claim asylum in the UK",
+  "base_path": "/claim-asylum-in-the-uk",
+  "public_updated_at": "2024-05-10T12:00:00Z",
+  "details": {
+    "body": "<h2>Overview</h2><p>You can claim asylum if you fear persecution.</p><h2>Next steps</h2><p>Contact the asylum intake unit to start your claim.</p>"
+  }
+}

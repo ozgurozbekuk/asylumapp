@@ -1,0 +1,28 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/*.test.js",
+    "start": "node server.js",
+    "index:asylum": "node scripts/indexAsylumDocs.js",
+    "index:govuk": "node scripts/ingest-govuk.js",
+    "sync:clerk-users": "node scripts/syncClerkUsers.js",
+    "test:govuk-normalize": "node scripts/test-govuk-normalize.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@clerk/backend": "^2.30.1",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "mongoose": "^8.19.3",
+    "multer": "^2.0.0",
+    "nodemon": "^3.1.11",
+    "openai": "^6.10.0",
+    "pdf-parse": "^1.1.1",
+    "zod": "^3.25.76"
+  }
+}
