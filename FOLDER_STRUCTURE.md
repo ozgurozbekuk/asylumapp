@@ -57,7 +57,7 @@ asylum-app/
 │   │   └── user.js
 │   │
 │   ├── services/
-│   │   ├── openaiService.js    # OpenAI + embeddings
+│   │   ├── llmProvider.js      # Central LLM adapter (Ollama chat + embeddings)
 │   │   ├── vectorService.js    # Pinecone / Upstash wrapper
 │   │   └── fileService.js      # Document upload handling
 │   │

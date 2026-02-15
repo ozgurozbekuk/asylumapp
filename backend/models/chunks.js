@@ -32,7 +32,7 @@ const chunkSchema = new Schema(
       trim: true,
     },
 
-    // The embedding vector returned by OpenAI (array of numbers)
+    // The embedding vector returned by the configured embedding provider (array of numbers)
     embedding: {
       type: [Number],
       required: true,

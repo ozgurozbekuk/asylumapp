@@ -3,8 +3,8 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import mongoose from "mongoose";
-import OpenAI from "openai";
 import Chunk from "../models/chunks.js";
+import { embed } from "../services/llmProvider.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -16,10 +16,6 @@ const DOCS_DIR = path.join(__dirname, "..", "data", "asylum"); // put your txt f
 // Approx: ~4 chars per token => 600–800 tokens ≈ 2400–3200 chars
 const MAX_CHUNK_CHARS = 2800;
 const CHUNK_OVERLAP = Math.round(MAX_CHUNK_CHARS * 0.15); // ~15% overlap
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
 
 // Very lightweight section-aware chunking:
 // - detect heading lines (e.g. starting with #, numbers, or ALL CAPS)
@@ -100,12 +96,7 @@ const getAllTextFiles = (dir) => {
 
 // Create embeddings for a batch of text
 const createEmbeddingsForBatch = async (texts) => {
-  const response = await openai.embeddings.create({
-    model: "text-embedding-3-small",
-    input: texts,
-  });
-
-  return response.data.map((item) => item.embedding);
+  return Promise.all(texts.map((text) => embed({ input: text })));
 };
 
 //process a single file: read , split ,embed, save chnks
@@ -168,8 +159,8 @@ const main = async () => {
     process.exit(1);
   }
 
-  if (!process.env.OPENAI_API_KEY) {
-    console.error("Missing OPENAI_API_KEY in environment");
+  if ((process.env.LLM_PROVIDER || "ollama").toLowerCase().trim() !== "ollama") {
+    console.error("Unsupported LLM_PROVIDER. Only 'ollama' is supported.");
     process.exit(1);
   }
 

@@ -22,8 +22,8 @@ const PrivacyPolicyPage = () => {
       <section>
         <h2 className="text-xl font-semibold text-slate-100">How We Use Information</h2>
         <p className="mt-2">
-          User input may be processed to generate responses using third-party AI services (e.g., OpenAI API). We do not
-          sell personal data.
+          User input may be processed by the application's self-hosted AI services to generate responses. We do not sell
+          personal data.
         </p>
       </section>
 
@@ -39,7 +39,8 @@ const PrivacyPolicyPage = () => {
       <section>
         <h2 className="text-xl font-semibold text-slate-100">Third-Party Services</h2>
         <p className="mt-2">
-          We may use third-party AI providers to process submitted text in accordance with their policies.
+          We may rely on infrastructure providers for hosting and authentication, but AI processing is handled on our own
+          server.
         </p>
       </section>
 

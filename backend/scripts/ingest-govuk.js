@@ -23,8 +23,8 @@ const main = async () => {
     process.exit(1);
   }
 
-  if (!process.env.OPENAI_API_KEY) {
-    console.error("Missing OPENAI_API_KEY in environment");
+  if ((process.env.LLM_PROVIDER || "ollama").toLowerCase().trim() !== "ollama") {
+    console.error("Unsupported LLM_PROVIDER. Only 'ollama' is supported.");
     process.exit(1);
   }
 

@@ -3,7 +3,7 @@ import fsSync from "fs";
 import path from "path";
 import crypto from "crypto";
 import pdf from "pdf-parse";
-import openai from "./openaiClient.js";
+import { embed } from "./llmProvider.js";
 import Chunk from "../models/chunks.js";
 import UploadedDocument from "../models/UploadedDocument.js";
 
@@ -101,11 +101,8 @@ const ensureDir = async (dir) => {
 };
 
 const createEmbeddingsForBatch = async (texts) => {
-  const response = await openai.embeddings.create({
-    model: "text-embedding-3-small",
-    input: texts,
-  });
-  return response.data.map((item) => item.embedding);
+  const vectors = await Promise.all(texts.map((text) => embed({ input: text })));
+  return vectors;
 };
 
 export const saveUploadedDocument = async ({ userId, file, storageDir }) => {

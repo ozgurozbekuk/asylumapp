@@ -9,11 +9,28 @@ Edit the whitelist in `backend/src/sources/govuk.sources.json` to control which 
 Set these in your backend environment:
 
 - `MONGO_DB_URI`
-- `OPENAI_API_KEY`
 - `ADMIN_TOKEN` (required for the admin ingestion endpoint)
 - `GOVUK_CONTACT_EMAIL` (used in the GOV.UK User-Agent header)
 - `STORAGE_DIR` (optional, defaults to `backend/data/uploads`)
 - `MAX_UPLOAD_MB` (optional, defaults to 12)
+- `LLM_PROVIDER=ollama`
+- `OLLAMA_BASE_URL=http://127.0.0.1:11434`
+- `OLLAMA_CHAT_MODEL=mistral`
+- `OLLAMA_EMBED_MODEL=nomic-embed-text`
+
+### Ollama setup
+Pull the required models on the Ollama host:
+
+```bash
+ollama pull mistral
+ollama pull nomic-embed-text
+```
+
+Run Ollama locally (bound to localhost):
+
+```bash
+OLLAMA_HOST=127.0.0.1:11434 ollama serve
+```
 
 ### Run ingestion locally
 From `backend/`:

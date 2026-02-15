@@ -1,4 +1,4 @@
-import openai from "./openaiClient.js";
+import { chat, embed } from "./llmProvider.js";
 import Chunk from "../models/chunks.js";
 import UploadedDocument from "../models/UploadedDocument.js";
 import { cosineSimilarity } from "../utils/cosineSimilarity.js";
@@ -103,11 +103,7 @@ export const analyzeUploadedDocument = async ({ userId, docId }) => {
 
   const govukContext = [];
   if (govukChunks.length) {
-    const embeddingResponse = await openai.embeddings.create({
-      model: "text-embedding-3-small",
-      input: GOVUK_QUERY,
-    });
-    const queryEmbedding = embeddingResponse.data[0].embedding;
+    const queryEmbedding = await embed({ input: GOVUK_QUERY });
 
     const scored = govukChunks
       .map((chunk) => ({ score: cosineSimilarity(queryEmbedding, chunk.embedding), chunk }))
@@ -121,8 +117,7 @@ export const analyzeUploadedDocument = async ({ userId, docId }) => {
   const userContextText = buildUserContext(orderedUserChunks);
   const govukContextText = buildGovUkContext(govukContext);
 
-  const completion = await openai.chat.completions.create({
-    model: "gpt-4.1-mini",
+  const completionText = await chat({
     temperature: 0.2,
     messages: [
       { role: "system", content: buildSystemPrompt() },
@@ -133,7 +128,7 @@ export const analyzeUploadedDocument = async ({ userId, docId }) => {
     ],
   });
 
-  const raw = completion.choices[0].message.content || "{}";
+  const raw = completionText || "{}";
   let parsed = null;
   try {
     parsed = JSON.parse(raw);
