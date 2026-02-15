@@ -655,16 +655,21 @@ const Chat = () => {
   };
 
   const loadSession = async (id) => {
-    const response = await apiRequest({
-      path: `/api/chat/sessions/${id}`,
-      getToken,
-      userId,
-    });
-    const loadedMessages = response?.messages?.map(mapMessage) || [];
-    const resolved = loadedMessages.length ? loadedMessages : initialMessages;
-    setMessages(resolved);
-    setActiveSessionId(id);
-    sessionMessagesCache.set(id, resolved);
+    try {
+      const response = await apiRequest({
+        path: `/api/chat/sessions/${id}`,
+        getToken,
+        userId,
+      });
+      const loadedMessages = response?.messages?.map(mapMessage) || [];
+      const resolved = loadedMessages.length ? loadedMessages : initialMessages;
+      setMessages(resolved);
+      setActiveSessionId(id);
+      sessionMessagesCache.set(id, resolved);
+    } catch (err) {
+      setError(err?.message || 'Failed to load chat session.');
+      toast.error(err?.message || 'Failed to load chat session.');
+    }
   };
 
   const handleDeleteSession = async (id) => {

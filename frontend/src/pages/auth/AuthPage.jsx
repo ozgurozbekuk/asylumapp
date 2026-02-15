@@ -2,8 +2,7 @@ import { SignIn, SignUp, SignedIn, SignedOut, SignOutButton, UserButton } from '
 import { trTR } from '@clerk/localizations';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000').replace(/\/$/, '');
+import { API_BASE_URL } from '../../config/env';
 
 const translations = {
   en: {
