@@ -243,7 +243,7 @@ const Home = ({ language = 'tr', setLanguage = () => {} }) => {
             href={t.footer.supportUrl}
             target="_blank"
             rel="noreferrer"
-            className="absolute left-1/2 hidden -translate-x-1/2 rounded-full bg-amber-200 px-4 py-2 text-sm font-semibold text-amber-900 shadow-sm transition hover:bg-amber-300 sm:inline-flex"
+            className="absolute left-1/2 hidden -translate-x-1/2 rounded-full border-2 border-amber-300 bg-amber-300 px-6 py-2.5 text-base font-extrabold text-amber-950 shadow-[0_10px_24px_-10px_rgba(252,211,77,0.95)] transition hover:scale-[1.03] hover:bg-amber-200 sm:inline-flex"
           >
             {t.nav.support}
           </a>
