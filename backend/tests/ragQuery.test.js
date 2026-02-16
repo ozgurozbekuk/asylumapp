@@ -30,6 +30,6 @@ test("buildChunkQuery keeps explicit non-user source filters unchanged", () => {
   const query = buildChunkQuery({ sector: "uk-asylum", sourceFilter: "GOV.UK", userId: "user_abc" });
   assert.deepEqual(query, {
     sector: "uk-asylum",
-    "metadata.source": "GOV.UK",
+    "metadata.source": { $ne: "USER_UPLOAD" },
   });
 });

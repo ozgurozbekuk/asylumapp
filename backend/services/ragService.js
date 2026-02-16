@@ -1,5 +1,5 @@
 import crypto from "crypto";
-import { chat, embed } from "./llmProvider.js";
+import { chat, chatStream, embed } from "./llmProvider.js";
 import Chunk from "../models/chunks.js";
 import { RetrievalCache } from "../models/RetrievalCache.js";
 import { Conversation } from "../models/Conversation.js";
@@ -13,9 +13,9 @@ import {
   sanitizeRagAnswer,
 } from "./ragAnswerPolicy.js";
 
-const MAX_CONTEXT_CHARS = 6000;
-const MAX_TOP_K = 5; // initial vector topK
-const FINAL_TOP_K = 3; // after rerank
+const MAX_CONTEXT_CHARS = Number(process.env.RAG_MAX_CONTEXT_CHARS || 6000);
+const MAX_TOP_K = Number(process.env.RAG_MAX_TOP_K || 5); // initial vector topK
+const FINAL_TOP_K = Number(process.env.RAG_FINAL_TOP_K || 3); // after rerank
 const DOC_INDEX_VERSION = process.env.DOC_INDEX_VERSION || "v1";
 
 const buildSystemPrompt = () =>
@@ -65,7 +65,7 @@ const buildConversationContext = ({ summary, recentMessages }) => {
 const buildUserMessage = ({ contextText, question, conversationContext }) =>
   [
     "You will be given:",
-    "- Retrieved excerpts from guidance and/or the user's own documents.",
+    "- Retrieved excerpts from the internal UK asylum guidance corpus.",
     "- A short conversation context (summary + recent turns).",
     "- IMPORTANT: The product scope is UK-only asylum and UK immigration support unless user explicitly asks another country.",
     "",
@@ -138,7 +138,7 @@ const summarizeConversationIfNeeded = async ({
 
   const newSummary = await chat({
     temperature: 0.2,
-    maxTokens: 220,
+    maxTokens: Number(process.env.RAG_SUMMARY_MAX_TOKENS || 220),
     messages: [
       {
         role: "system",
@@ -160,6 +160,13 @@ const summarizeConversationIfNeeded = async ({
   return updated || conversation;
 };
 
+const refreshConversationSummaryInBackground = ({ conversation, totalMessages }) => {
+  summarizeConversationIfNeeded({ conversation, totalMessages }).catch((error) => {
+    // Best-effort optimization: summary refresh should never block user response.
+    console.error("Summary refresh failed:", error?.message || error);
+  });
+};
+
 export const answerAsylumQuestion = async (question, options = {}) => {
   const trimmedQuestion = (question || "").trim();
   if (!trimmedQuestion) {
@@ -175,6 +182,7 @@ export const answerAsylumQuestion = async (question, options = {}) => {
   const sourceFilter = resolvedOptions.sourceFilter || null;
   const userId = resolvedOptions.userId || null;
   const conversationId = resolvedOptions.conversationId || null;
+  const onToken = typeof resolvedOptions.onToken === "function" ? resolvedOptions.onToken : null;
 
   const normalizedQuery = normalizeQuery(trimmedQuestion);
   const cacheKeyInput = `${userId || "anon"}|${sector}|${sourceFilter || ""}|${normalizedQuery}|${DOC_INDEX_VERSION}`;
@@ -205,16 +213,34 @@ export const answerAsylumQuestion = async (question, options = {}) => {
       .slice(0, MAX_TOP_K);
   } else {
     const questionEmbedding = await embed({ input: trimmedQuestion });
+    const expectedDim = Array.isArray(questionEmbedding) ? questionEmbedding.length : 0;
 
     const query = buildChunkQuery({ sector, sourceFilter, userId });
 
-    const chunks = await Chunk.find(query).lean();
+    const chunks = await Chunk.find(
+      query,
+      { _id: 1, sourceId: 1, text: 1, embedding: 1, metadata: 1 },
+    ).lean();
 
     if (!chunks || chunks.length === 0) {
       throw new Error("No chunks found in database");
     }
 
-    const scored = chunks.map((chunkDoc) => {
+    const compatibleChunks = chunks.filter((chunkDoc) => {
+      const vector = chunkDoc?.embedding;
+      return Array.isArray(vector) && vector.length === expectedDim;
+    });
+
+    if (!compatibleChunks.length) {
+      return {
+        answer: buildInsufficientUkInfoAnswer(trimmedQuestion),
+        contextUsed: [],
+        citations: [],
+        safetyFlags: ["embedding_mismatch"],
+      };
+    }
+
+    const scored = compatibleChunks.map((chunkDoc) => {
       const score = cosineSimilarity(questionEmbedding, chunkDoc.embedding);
       return { score, chunk: chunkDoc };
     });
@@ -259,16 +285,13 @@ export const answerAsylumQuestion = async (question, options = {}) => {
   }
 
   // Lightweight heuristic rerank over vector topK to pick FINAL_TOP_K
+  const firstQueryToken = normalizeQuery(trimmedQuestion).split(" ")[0] || "";
   const reranked = topCandidates
     .map((item) => {
       const text = item.chunk.text || "";
       const headingPath = item.chunk.metadata?.headingPath || [];
       const keywordScore = computeKeywordOverlap(trimmedQuestion, text);
-      const headingBoost = headingPath.some((h) =>
-        normalizeQuery(h).includes(
-          normalizeQuery(trimmedQuestion).split(" ")[0] || "",
-        ),
-      )
+      const headingBoost = headingPath.some((h) => normalizeQuery(h).includes(firstQueryToken))
         ? 0.05
         : 0;
       const finalScore = item.score + keywordScore * 0.3 + headingBoost;
@@ -300,19 +323,7 @@ export const answerAsylumQuestion = async (question, options = {}) => {
 
   const contextText = contextPieces.join("\n\n---\n\n");
   const citationLabel = deriveCitationLabel(selected);
-  const hasUkSpecificContext = selected.some((item) => {
-    const meta = item?.chunk?.metadata || {};
-    const url = String(meta.url || meta.sourceUrl || "").toLowerCase();
-    const source = String(meta.source || "").toLowerCase();
-    const text = String(item?.chunk?.text || "").toLowerCase();
-    return (
-      url.includes("gov.uk") ||
-      source === "gov.uk" ||
-      text.includes("united kingdom") ||
-      text.includes(" uk ") ||
-      text.includes("home office")
-    );
-  });
+  const hasUkSpecificContext = selected.length > 0;
 
   let conversationContext = "";
   let updatedConversation = null;
@@ -331,7 +342,8 @@ export const answerAsylumQuestion = async (question, options = {}) => {
         conversationId,
         userId,
       });
-      updatedConversation = await summarizeConversationIfNeeded({
+      updatedConversation = conversation;
+      refreshConversationSummaryInBackground({
         conversation,
         totalMessages,
       });
@@ -346,9 +358,9 @@ export const answerAsylumQuestion = async (question, options = {}) => {
   if (!hasUkSpecificContext) {
     rawAnswer = buildInsufficientUkInfoAnswer(trimmedQuestion);
   } else {
-    rawAnswer = await chat({
+    const chatRequest = {
       temperature: 0.2,
-      maxTokens: 600,
+      maxTokens: Number(process.env.RAG_ANSWER_MAX_TOKENS || 500),
       messages: [
         { role: "system", content: buildSystemPrompt() },
         {
@@ -360,7 +372,18 @@ export const answerAsylumQuestion = async (question, options = {}) => {
           }),
         },
       ],
-    });
+    };
+
+    if (onToken) {
+      let streamed = "";
+      for await (const token of chatStream(chatRequest)) {
+        streamed += token;
+        await onToken(token);
+      }
+      rawAnswer = streamed;
+    } else {
+      rawAnswer = await chat(chatRequest);
+    }
   }
 
   let finalAnswer = sanitizeRagAnswer({

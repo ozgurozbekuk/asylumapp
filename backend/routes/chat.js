@@ -26,6 +26,7 @@ const messageSchema = z.object({
   content: z.string().trim().min(1).max(MAX_MESSAGE_LENGTH),
   sourceFilter: z.string().trim().max(64).optional(),
   officialOnly: z.boolean().optional(),
+  stream: z.boolean().optional(),
 });
 
 // List chat sessions for the signed-in Clerk user.
@@ -135,7 +136,7 @@ router.post(
       return res.status(400).json({ message: "Invalid request body", issues: parseResult.error.issues });
     }
 
-    const { content, sourceFilter, officialOnly } = parseResult.data;
+    const { content, stream = false } = parseResult.data;
 
     const conversation = await Conversation.findOne({ _id: id, userId });
     if (!conversation) return res.status(404).json({ message: "Session not found" });
@@ -163,10 +164,63 @@ router.post(
       content: content.trim(),
     });
 
-    const resolvedSourceFilter = officialOnly ? "GOV.UK" : sourceFilter;
+    if (stream) {
+      res.setHeader("Content-Type", "text/event-stream; charset=utf-8");
+      res.setHeader("Cache-Control", "no-cache, no-transform");
+      res.setHeader("Connection", "keep-alive");
+      res.flushHeaders?.();
+
+      const sendEvent = (event, data) => {
+        res.write(`event: ${event}\n`);
+        res.write(`data: ${JSON.stringify(data)}\n\n`);
+      };
+
+      try {
+        const assistantReply = await answerAsylumQuestion(content.trim(), {
+          sector: "uk-asylum",
+          sourceFilter: null,
+          userId,
+          conversationId: id,
+          onToken: async (token) => {
+            sendEvent("token", { token });
+          },
+        });
+
+        const assistantMessage = await Message.create({
+          conversationId: id,
+          userId,
+          role: "assistant",
+          content: assistantReply?.answer || "",
+          citations: assistantReply?.citations || [],
+        });
+
+        if (!conversation.title || ["New chat", "Yeni Sohbet"].includes(conversation.title)) {
+          await Conversation.updateOne(
+            { _id: id, userId },
+            {
+              $set: { title: content.trim().slice(0, 48) },
+              $currentDate: { updatedAt: true },
+            },
+          );
+        } else {
+          await Conversation.updateOne({ _id: id, userId }, { $currentDate: { updatedAt: true } });
+        }
+
+        sendEvent("done", {
+          userMessage,
+          assistantMessage,
+          citations: assistantReply?.citations || [],
+        });
+      } catch (err) {
+        sendEvent("error", { message: err?.message || "Streaming failed" });
+      }
+
+      return res.end();
+    }
+
     const assistantReply = await answerAsylumQuestion(content.trim(), {
       sector: "uk-asylum",
-      sourceFilter: resolvedSourceFilter,
+      sourceFilter: null,
       userId,
       conversationId: id,
     });

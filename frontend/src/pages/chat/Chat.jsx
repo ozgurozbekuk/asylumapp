@@ -3,6 +3,7 @@ import { SignedIn, SignedOut, UserButton, useAuth } from '@clerk/clerk-react';
 import { Link } from 'react-router-dom';
 import { Toaster, toast } from 'react-hot-toast';
 import { apiRequest } from '../../api/client';
+import { API_BASE_URL } from '../../config/env';
 
 const memoryCache = new Map();
 const sessionMessagesCache = new Map();
@@ -543,7 +544,10 @@ const Chat = () => {
   const [activeSessionId, setActiveSessionId] = useState(null);
   const [isSessionsLoading, setIsSessionsLoading] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
+  const [isStreamingMessage, setIsStreamingMessage] = useState(false);
+  const [hasVisibleStreamToken, setHasVisibleStreamToken] = useState(false);
   const [error, setError] = useState(null);
+  const STREAM_ASSISTANT_RESPONSES = true;
   const messagesEndRef = useRef(null);
   const messagesContainerRef = useRef(null);
   const [showScrollToBottom, setShowScrollToBottom] = useState(false);
@@ -703,22 +707,148 @@ const Chat = () => {
     }
     setInput('');
     setIsLoading(true);
+    setHasVisibleStreamToken(false);
 
+    let streamAssistantId = null;
+    let streamAssistantCreated = false;
     try {
       const sessionId = activeSessionId || (await createSession());
       if (!sessionId) return;
 
-      const response = value
-        ? await apiRequest({
-            path: `/api/chat/sessions/${sessionId}/messages`,
-            method: 'POST',
-            body: { content: value, officialOnly },
-            getToken,
-            userId,
-          })
-        : null;
+      let response = null;
+      if (value && STREAM_ASSISTANT_RESPONSES) {
+        setIsStreamingMessage(true);
+        const token = typeof getToken === 'function' ? await getToken() : null;
+        const streamResponse = await fetch(`${API_BASE_URL}/api/chat/sessions/${sessionId}/messages`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            ...(userId ? { 'x-clerk-user-id': userId } : {}),
+          },
+          body: JSON.stringify({ content: value, officialOnly, stream: true }),
+        });
 
-      if (response) {
+        if (!streamResponse.ok) {
+          const payload = await streamResponse.json().catch(() => null);
+          throw new Error(payload?.message || `Request failed (${streamResponse.status})`);
+        }
+
+        const reader = streamResponse.body?.getReader();
+        const decoder = new TextDecoder();
+        if (!reader) {
+          throw new Error('Streaming response body is not available.');
+        }
+
+        streamAssistantId = `assistant-${Date.now()}`;
+        streamAssistantCreated = true;
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: streamAssistantId,
+            role: 'assistant',
+            content: t.thinking,
+            citations: [],
+          },
+        ]);
+
+        let buffer = '';
+        let donePayload = null;
+
+        const appendAssistantToken = (tokenText) => {
+          if (typeof tokenText === 'string' && /[\p{L}\p{N}]/u.test(tokenText)) {
+            setHasVisibleStreamToken(true);
+          }
+
+          setMessages((prev) =>
+            prev.map((message) =>
+              message.id === streamAssistantId
+                ? {
+                    ...message,
+                    content:
+                      message.content === t.thinking
+                        ? tokenText
+                        : `${message.content || ''}${tokenText}`,
+                  }
+                : message,
+            ),
+          );
+        };
+
+        while (true) {
+          // eslint-disable-next-line no-await-in-loop
+          const { value: chunkValue, done } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(chunkValue, { stream: true });
+
+          const frames = buffer.split('\n\n');
+          buffer = frames.pop() || '';
+
+          frames.forEach((frame) => {
+            const lines = frame.split('\n');
+            const eventLine = lines.find((line) => line.startsWith('event:'));
+            const dataLine = lines.find((line) => line.startsWith('data:'));
+            const eventType = eventLine ? eventLine.replace('event:', '').trim() : 'message';
+            const dataText = dataLine ? dataLine.replace('data:', '').trim() : '{}';
+
+            let data = {};
+            try {
+              data = JSON.parse(dataText);
+            } catch {
+              data = {};
+            }
+
+            if (eventType === 'token' && data?.token) {
+              appendAssistantToken(data.token);
+            }
+            if (eventType === 'done') {
+              donePayload = data;
+            }
+            if (eventType === 'error') {
+              throw new Error(data?.message || 'Streaming failed');
+            }
+          });
+        }
+
+        response = donePayload;
+        if (response?.assistantMessage) {
+          if (!streamAssistantCreated && streamAssistantId) {
+            streamAssistantCreated = true;
+            setMessages((prev) => [
+              ...prev,
+              {
+                id: streamAssistantId,
+                role: 'assistant',
+                content: response.assistantMessage.content || t.noAnswer,
+                citations: response.assistantMessage.citations || response.citations || [],
+              },
+            ]);
+          }
+          setMessages((prev) =>
+            prev.map((message) =>
+              message.id === streamAssistantId
+                ? {
+                    ...message,
+                    content: response.assistantMessage.content || message.content || t.noAnswer,
+                    citations: response.assistantMessage.citations || response.citations || [],
+                  }
+                : message,
+            ),
+          );
+        }
+      } else {
+        response = value
+          ? await apiRequest({
+              path: `/api/chat/sessions/${sessionId}/messages`,
+              method: 'POST',
+              body: { content: value, officialOnly },
+              getToken,
+              userId,
+            })
+          : null;
+      }
+
+      if (response && !STREAM_ASSISTANT_RESPONSES) {
         setMessages((prev) => [
           ...prev,
           {
@@ -740,16 +870,34 @@ const Chat = () => {
       } else {
         fallback = t.contactError;
       }
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: `assistant-${Date.now()}`,
-          role: 'assistant',
-          content: fallback,
-        },
-      ]);
+      if (streamAssistantCreated && streamAssistantId) {
+        setMessages((prev) =>
+          prev.map((message) =>
+            message.id === streamAssistantId
+              ? {
+                  ...message,
+                  content:
+                    !message.content || message.content === t.thinking
+                      ? fallback
+                      : message.content,
+                }
+              : message,
+          ),
+        );
+      } else {
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: `assistant-${Date.now()}`,
+            role: 'assistant',
+            content: fallback,
+          },
+        ]);
+      }
       setError(err?.message || 'Failed to contact the assistant.');
     } finally {
+      setIsStreamingMessage(false);
+      setHasVisibleStreamToken(false);
       setIsLoading(false);
     }
   };
@@ -1012,13 +1160,16 @@ const Chat = () => {
                 See Disclaimer.
               </Link>
             </p>
+            {isLoading && !isStreamingMessage ? (
+              <p className="mb-4 text-center text-xs text-slate-400">{t.thinking}</p>
+            ) : null}
           </div>
 
           <MessageList
             messages={messages}
             userLabel={t.userLabel}
             assistantLabel={t.assistantLabel}
-            isTyping={isLoading}
+            isTyping={isLoading && !isStreamingMessage && !STREAM_ASSISTANT_RESPONSES}
             copiedLabel={t.copiedLabel}
           />
           <div ref={messagesEndRef} />

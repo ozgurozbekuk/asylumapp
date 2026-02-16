@@ -3,7 +3,7 @@ import fsSync from "fs";
 import path from "path";
 import crypto from "crypto";
 import pdf from "pdf-parse";
-import { embed } from "./llmProvider.js";
+import { embedBatch } from "./llmProvider.js";
 import Chunk from "../models/chunks.js";
 import UploadedDocument from "../models/UploadedDocument.js";
 
@@ -101,8 +101,7 @@ const ensureDir = async (dir) => {
 };
 
 const createEmbeddingsForBatch = async (texts) => {
-  const vectors = await Promise.all(texts.map((text) => embed({ input: text })));
-  return vectors;
+  return embedBatch({ inputs: texts });
 };
 
 export const saveUploadedDocument = async ({ userId, file, storageDir }) => {

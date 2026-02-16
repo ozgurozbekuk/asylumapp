@@ -12,7 +12,7 @@ import { resolveUserPlan } from "./middleware/planGuard.js";
 
 dotenv.config({ path: new URL("./.env", import.meta.url) });
 
-const requiredEnv = ["MONGO_DB_URI", "CLERK_SECRET_KEY"];
+const requiredEnv = ["MONGO_DB_URI", "CLERK_SECRET_KEY", "OPENAI_API_KEY"];
 const missing = requiredEnv.filter((key) => !process.env[key]);
 if (missing.length > 0) {
   // eslint-disable-next-line no-console

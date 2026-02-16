@@ -4,7 +4,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import mongoose from "mongoose";
 import Chunk from "../models/chunks.js";
-import { embed } from "../services/llmProvider.js";
+import { embedBatch } from "../services/llmProvider.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -96,7 +96,7 @@ const getAllTextFiles = (dir) => {
 
 // Create embeddings for a batch of text
 const createEmbeddingsForBatch = async (texts) => {
-  return Promise.all(texts.map((text) => embed({ input: text })));
+  return embedBatch({ inputs: texts });
 };
 
 //process a single file: read , split ,embed, save chnks
@@ -159,8 +159,8 @@ const main = async () => {
     process.exit(1);
   }
 
-  if ((process.env.LLM_PROVIDER || "ollama").toLowerCase().trim() !== "ollama") {
-    console.error("Unsupported LLM_PROVIDER. Only 'ollama' is supported.");
+  if (!process.env.OPENAI_API_KEY) {
+    console.error("Missing OPENAI_API_KEY in environment");
     process.exit(1);
   }
 

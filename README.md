@@ -1,74 +1,93 @@
 # Asylum Assistant
 
-## GOV.UK official source ingestion
+UK asylum and immigration chat assistant.
 
-### Configure sources
-Edit the whitelist in `backend/src/sources/govuk.sources.json` to control which GOV.UK pages are ingested.
+- `frontend/`: React + Vite + Clerk
+- `backend/`: Express + MongoDB + OpenAI API
 
-### Environment variables
-Set these in your backend environment:
+## Current status
+- OpenAI is the active LLM provider for both chat and embeddings.
+- Ollama is not used in this build.
 
+## Environment
+
+### Backend (`backend/.env`)
+Required:
 - `MONGO_DB_URI`
-- `ADMIN_TOKEN` (required for the admin ingestion endpoint)
-- `GOVUK_CONTACT_EMAIL` (used in the GOV.UK User-Agent header)
-- `STORAGE_DIR` (optional, defaults to `backend/data/uploads`)
-- `MAX_UPLOAD_MB` (optional, defaults to 12)
-- `LLM_PROVIDER=ollama`
-- `OLLAMA_BASE_URL=http://127.0.0.1:11434`
-- `OLLAMA_CHAT_MODEL=mistral`
-- `OLLAMA_EMBED_MODEL=nomic-embed-text`
+- `CLERK_SECRET_KEY`
+- `OPENAI_API_KEY`
 
-### Ollama setup
-Pull the required models on the Ollama host:
+Recommended:
+- `PORT=3000`
+- `CORS_ORIGIN=http://localhost:5173`
+- `LLM_PROVIDER=openai`
+- `OPENAI_CHAT_MODEL=gpt-4.1-mini`
+- `OPENAI_EMBED_MODEL=text-embedding-3-small`
+- `RAG_MAX_CONTEXT_CHARS=6000`
+- `RAG_MAX_TOP_K=5`
+- `RAG_FINAL_TOP_K=3`
+- `RAG_SUMMARY_MAX_TOKENS=220`
+- `RAG_ANSWER_MAX_TOKENS=500`
 
+Optional:
+- `ADMIN_TOKEN`
+
+Use `backend/.env.example` as your template.
+
+### Frontend (`frontend/.env`)
+Required:
+- `VITE_CLERK_PUBLISHABLE_KEY`
+- `VITE_API_URL` (example: `http://localhost:3000` or `https://api.example.com`)
+
+Optional:
+- `VITE_API_TIMEOUT_MS=70000`
+
+## Run locally
+
+### Backend
 ```bash
-ollama pull mistral
-ollama pull nomic-embed-text
+cd backend
+npm install
+npm start
 ```
 
-Run Ollama locally (bound to localhost):
-
+### Frontend
 ```bash
-OLLAMA_HOST=127.0.0.1:11434 ollama serve
+cd frontend
+npm install
+npm run dev
 ```
 
-### Run ingestion locally
-From `backend/`:
+## Build and test
 
+### Frontend build
 ```bash
-npm run index:govuk
+cd frontend
+npm run build
 ```
 
-Optional sanity check for normalization:
-
+### Backend tests
 ```bash
-npm run test:govuk-normalize
+cd backend
+npm test
 ```
 
-### Trigger ingestion via API
-Send a POST request to the admin endpoint:
+## Re-embed chunks after provider/model change
+If chunk embeddings were generated with a different provider/model, regenerate them:
 
 ```bash
-POST /api/admin/ingest/govuk
-Authorization: Bearer <ADMIN_TOKEN>
+cd backend
+npm run reembed:openai
 ```
 
-You can also send `x-admin-token: <ADMIN_TOKEN>` if preferred.
+This updates all chunk embeddings and clears retrieval cache records.
 
-## Document upload + insights
+## Deploy notes
+- Set `CORS_ORIGIN` to your frontend domain.
+- Set `VITE_API_URL` to your backend public URL.
+- Prefer reverse proxy (Nginx) and expose only `80/443`.
 
-### Uploads
-Users can upload PDF or TXT files. Files are stored per user under `STORAGE_DIR/<userId>/<docId>/`.
-
-### Analyze a document
-Use the UI "Document Insights" panel or call:
-
+## Health check
 ```bash
-POST /api/documents/:id/analyze
+curl http://127.0.0.1:<PORT>/health
 ```
-
-The response contains:
-- `explanation`
-- `deadlines` (structured items)
-- `nextSteps`
-- citations for both user documents and GOV.UK guidance
