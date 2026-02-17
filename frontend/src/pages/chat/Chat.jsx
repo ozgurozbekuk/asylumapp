@@ -397,7 +397,7 @@ const Composer = ({
   );
 };
 
-const Chat = ({ language = 'en', setLanguage = () => {} }) => {
+const Chat = ({ language = 'tr', setLanguage = () => {} }) => {
   const { getToken, userId } = useAuth();
   const CACHE_TTL_MS = 5 * 60 * 1000;
   const [officialOnly, setOfficialOnly] = useState(false);

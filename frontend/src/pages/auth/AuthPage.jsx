@@ -265,14 +265,21 @@ export const SignInPage = ({ language, setLanguage }) => {
         </>
       }
     >
-      <SignIn
-        path="/login"
-        routing="path"
-        signUpUrl="/register"
-        afterSignInUrl="/chat"
-        appearance={{ elements: { formButtonPrimary: 'bg-cyan-600 hover:bg-cyan-700' } }}
-        localization={language === 'tr' ? trTR : undefined}
-      />
+      <div className="flex justify-center">
+        <SignIn
+          path="/login"
+          routing="path"
+          signUpUrl="/register"
+          afterSignInUrl="/chat"
+          appearance={{
+            elements: {
+              rootBox: 'mx-auto',
+              formButtonPrimary: 'bg-cyan-600 hover:bg-cyan-700',
+            },
+          }}
+          localization={language === 'tr' ? trTR : undefined}
+        />
+      </div>
     </AuthShell>
   );
 };
@@ -406,14 +413,21 @@ const SignUpWithPlans = ({ language, setLanguage }) => {
         </div>
 
         <div className="rounded-2xl border border-cyan-100 bg-white p-4 shadow-lg sm:p-6">
-          <SignUp
-            path="/register"
-            routing="path"
-            signInUrl="/login"
-            afterSignUpUrl={afterSignUpUrl}
-            appearance={{ elements: { formButtonPrimary: 'bg-cyan-600 hover:bg-cyan-700' } }}
-            localization={language === 'tr' ? trTR : undefined}
-          />
+          <div className="flex justify-center">
+            <SignUp
+              path="/register"
+              routing="path"
+              signInUrl="/login"
+              afterSignUpUrl={afterSignUpUrl}
+              appearance={{
+                elements: {
+                  rootBox: 'mx-auto',
+                  formButtonPrimary: 'bg-cyan-600 hover:bg-cyan-700',
+                },
+              }}
+              localization={language === 'tr' ? trTR : undefined}
+            />
+          </div>
         </div>
         <p className="text-center text-xs text-slate-600">
           {t.planHelper}

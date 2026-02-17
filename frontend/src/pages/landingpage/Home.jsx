@@ -209,7 +209,7 @@ const content = {
   },
 };
 
-const Home = ({ language = 'en', setLanguage = () => {} }) => {
+const Home = ({ language = 'tr', setLanguage = () => {} }) => {
   const [languageMenuOpen, setLanguageMenuOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const currentYear = new Date().getFullYear();
