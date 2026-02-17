@@ -536,9 +536,6 @@ const Home = ({ language = 'tr', setLanguage = () => {} }) => {
           <div className="mx-auto mt-6 max-w-3xl rounded-2xl bg-[#151821] px-5 py-4 text-center text-[11px] leading-relaxed text-slate-300 shadow-inner">
             <span className="font-semibold text-slate-100">Important Disclaimer:</span> {t.footer.disclaimer}
           </div>
-          <p className="mt-4 text-center text-xs text-slate-500">
-            Contains public sector information licensed under the Open Government Licence v3.0.
-          </p>
           <p className="mt-6 text-center text-xs text-slate-500">© {currentYear} {t.footer.copyrightSuffix}</p>
         </footer>
       </main>
