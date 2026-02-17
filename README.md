@@ -1,50 +1,49 @@
 # Asylum Assistant
 
-UK asylum and immigration chat assistant.
+Asylum Assistant is a production-ready AI application built with a Retrieval-Augmented Generation (RAG) architecture to provide reliable, context-aware information about the UK asylum and immigration process.
 
-- `frontend/`: React + Vite + Clerk
-- `backend/`: Express + MongoDB + OpenAI API
+The system retrieves relevant content from curated and trusted sources, then generates responses using a large language model grounded in that retrieved context. This approach improves factual accuracy and reduces hallucinations compared to standard prompt-only chat systems.
 
-## Current status
-- OpenAI is the active LLM provider for both chat and embeddings.
-- Ollama is not used in this build.
+The application is designed as an informational support tool and does not provide legal advice.
 
-## Environment
+## Screenshots
 
-### Backend (`backend/.env`)
-Required:
-- `MONGO_DB_URI`
-- `CLERK_SECRET_KEY`
-- `OPENAI_API_KEY`
+![Asylum Assistant Home](docs/screenshots/home.png)
 
-Recommended:
-- `PORT=3000`
-- `CORS_ORIGIN=http://localhost:5173`
-- `LLM_PROVIDER=openai`
-- `OPENAI_CHAT_MODEL=gpt-4.1-mini`
-- `OPENAI_EMBED_MODEL=text-embedding-3-small`
-- `RAG_MAX_CONTEXT_CHARS=6000`
-- `RAG_MAX_TOP_K=5`
-- `RAG_FINAL_TOP_K=3`
-- `RAG_SUMMARY_MAX_TOKENS=220`
-- `RAG_ANSWER_MAX_TOKENS=500`
+![Asylum Assistant Chat](docs/screenshots/chat.png)
 
-Optional:
-- `ADMIN_TOKEN`
+## Architecture Overview
 
-Use `backend/.env.example` as your template.
+- Frontend: React + Vite, with Clerk for authentication
+- Backend: Node.js (Express) API with MongoDB
+- AI Layer:
+  - Semantic retrieval using vector embeddings
+  - Context selection and prompt assembly
+  - Response generation via OpenAI models
+- Deployment:
+  - Backend served behind a reverse proxy
+  - Secure environment configuration
+  - Public access limited to HTTPS endpoints
 
-### Frontend (`frontend/.env`)
-Required:
-- `VITE_CLERK_PUBLISHABLE_KEY`
-- `VITE_API_URL` (example: `http://localhost:3000` or `https://api.example.com`)
+## Key Features
 
-Optional:
-- `VITE_API_TIMEOUT_MS=70000`
+- Retrieval-Augmented Generation (RAG) pipeline for grounded answers
+- Secure user authentication and access control
+- Usage limits to manage cost and prevent abuse
+- Chat-based interface focused on clarity and accessibility
+- Health check endpoint for production monitoring
 
-## Run locally
+## Project Structure
+
+```text
+frontend/   # Client application (React + Vite)
+backend/    # API, RAG pipeline, database, and auth logic
+```
+
+## Local Development (Optional)
 
 ### Backend
+
 ```bash
 cd backend
 npm install
@@ -52,42 +51,19 @@ npm start
 ```
 
 ### Frontend
+
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
 
-## Build and test
+## Deployment Notes
 
-### Frontend build
-```bash
-cd frontend
-npm run build
-```
+- The backend is designed to run behind a reverse proxy (e.g. Nginx).
+- Only ports 80 and 443 should be exposed publicly.
+- All sensitive configuration is managed via environment variables and is not committed to source control.
 
-### Backend tests
-```bash
-cd backend
-npm test
-```
+## Disclaimer
 
-## Re-embed chunks after provider/model change
-If chunk embeddings were generated with a different provider/model, regenerate them:
-
-```bash
-cd backend
-npm run reembed:openai
-```
-
-This updates all chunk embeddings and clears retrieval cache records.
-
-## Deploy notes
-- Set `CORS_ORIGIN` to your frontend domain.
-- Set `VITE_API_URL` to your backend public URL.
-- Prefer reverse proxy (Nginx) and expose only `80/443`.
-
-## Health check
-```bash
-curl http://127.0.0.1:<PORT>/health
-```
+This application provides general informational support only and does not constitute legal advice. Users should consult qualified legal professionals for case-specific guidance.
