@@ -480,7 +480,7 @@ const Home = ({ language = 'tr', setLanguage = () => {} }) => {
           </p>
         </section>
 
-        <section className="mt-16 w-full max-w-6xl rounded-[28px] border border-[#1e2026] bg-[#111319] p-4 shadow-[0_20px_50px_-35px_rgba(0,0,0,0.6)]">
+        <section className="mt-16 w-full max-w-5xl rounded-[28px] border border-[#1e2026] bg-[#111319] p-4 shadow-[0_20px_50px_-35px_rgba(0,0,0,0.6)]">
           <div className="relative overflow-hidden rounded-[24px]">
             <img
               src={t.highlight.image}
