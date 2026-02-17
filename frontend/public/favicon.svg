@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <defs>
+    <linearGradient id="shieldFill" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a0b10" />
+      <stop offset="100%" stop-color="#12141b" />
+    </linearGradient>
+  </defs>
+  <path
+    d="M128 12 28 42v70c0 59 27 98 100 132 73-34 100-73 100-132V42L128 12Z"
+    fill="url(#shieldFill)"
+    stroke="#06070b"
+    stroke-width="6"
+    stroke-linejoin="round"
+  />
+  <path
+    d="M128 24 40 49v61c0 53 24 88 88 118 64-30 88-65 88-118V49L128 24Z"
+    fill="none"
+    stroke="#ffffff"
+    stroke-width="6"
+    stroke-linejoin="round"
+    opacity="0.95"
+  />
+  <path
+    d="M125.3 68h5.4c3.5 0 6.6 2.2 7.7 5.6l36.7 108.4h-25.9l-8.3-25.1H114l-8.3 25.1H79.8L117.6 73.6c1.2-3.4 4.2-5.6 7.7-5.6Zm2.7 30.9-7 21.4h14.1l-7.1-21.4Z"
+    fill="#ffffff"
+  />
+</svg>
