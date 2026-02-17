@@ -718,6 +718,18 @@ const Chat = () => {
       let response = null;
       if (value && STREAM_ASSISTANT_RESPONSES) {
         setIsStreamingMessage(true);
+        streamAssistantId = `assistant-${Date.now()}`;
+        streamAssistantCreated = true;
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: streamAssistantId,
+            role: 'assistant',
+            content: t.thinking,
+            citations: [],
+          },
+        ]);
+
         const token = typeof getToken === 'function' ? await getToken() : null;
         const streamResponse = await fetch(`${API_BASE_URL}/api/chat/sessions/${sessionId}/messages`, {
           method: 'POST',
@@ -739,18 +751,6 @@ const Chat = () => {
         if (!reader) {
           throw new Error('Streaming response body is not available.');
         }
-
-        streamAssistantId = `assistant-${Date.now()}`;
-        streamAssistantCreated = true;
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: streamAssistantId,
-            role: 'assistant',
-            content: t.thinking,
-            citations: [],
-          },
-        ]);
 
         let buffer = '';
         let donePayload = null;
@@ -1069,14 +1069,26 @@ const Chat = () => {
             <div className="absolute right-0 top-0 h-full w-[280px] bg-[#0b0d12] px-4 py-5 shadow-2xl">
               <div className="mb-4 flex items-center justify-between">
                 <div className="text-sm font-semibold text-slate-100">{t.assistantName}</div>
-                <button
-                  type="button"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="flex h-8 w-8 items-center justify-center rounded-full border border-[#24272f] bg-[#151821] text-slate-200"
-                  aria-label="Close menu"
-                >
-                  ✕
-                </button>
+                <div className="flex items-center gap-2">
+                  <SignedIn>
+                    <UserButton
+                      appearance={{
+                        elements: {
+                          avatarBox: 'h-8 w-8 rounded-full border border-[#24272f]',
+                        },
+                      }}
+                      afterSignOutUrl="/"
+                    />
+                  </SignedIn>
+                  <button
+                    type="button"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="flex h-8 w-8 items-center justify-center rounded-full border border-[#24272f] bg-[#151821] text-slate-200"
+                    aria-label="Close menu"
+                  >
+                    ✕
+                  </button>
+                </div>
               </div>
               <div className="space-y-2">
                 <Link

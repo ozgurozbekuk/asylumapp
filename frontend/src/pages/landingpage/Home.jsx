@@ -463,6 +463,14 @@ const Home = ({ language = 'tr', setLanguage = () => {} }) => {
             >
               {t.hero.secondaryCta}
             </a>
+            <a
+              href={t.footer.supportUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center justify-center rounded-full border-2 border-amber-300 bg-amber-300 px-6 py-3 text-base font-extrabold text-amber-950 shadow-[0_10px_24px_-10px_rgba(252,211,77,0.95)] transition hover:scale-[1.03] hover:bg-amber-200 sm:hidden"
+            >
+              {t.nav.support}
+            </a>
           </div>
           <p className="mt-6 flex items-center justify-center gap-2 text-xs font-medium text-slate-400">
             <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#1f222b] text-[10px] font-semibold text-slate-300">
