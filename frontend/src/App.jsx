@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { RedirectToSignIn, SignedIn, SignedOut } from '@clerk/clerk-react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Chat from './pages/chat/Chat';
@@ -19,7 +19,16 @@ const ProtectedRoute = ({ children }) => (
 );
 
 function App() {
-  const [language, setLanguage] = useState('tr');
+  const [language, setLanguage] = useState(() => {
+    if (typeof window === 'undefined') return 'tr';
+    const storedLanguage = window.localStorage.getItem('appLanguage');
+    return storedLanguage === 'en' || storedLanguage === 'tr' ? storedLanguage : 'tr';
+  });
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    window.localStorage.setItem('appLanguage', language);
+  }, [language]);
 
   return (
     <BrowserRouter>

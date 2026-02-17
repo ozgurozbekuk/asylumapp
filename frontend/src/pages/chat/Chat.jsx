@@ -397,10 +397,9 @@ const Composer = ({
   );
 };
 
-const Chat = () => {
+const Chat = ({ language = 'tr', setLanguage = () => {} }) => {
   const { getToken, userId } = useAuth();
   const CACHE_TTL_MS = 5 * 60 * 1000;
-  const [language, setLanguage] = useState('tr');
   const [officialOnly, setOfficialOnly] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const translations = useMemo(
@@ -570,6 +569,11 @@ const Chat = () => {
   useEffect(() => {
     latestInitialMessagesRef.current = initialMessages;
   }, [initialMessages]);
+
+  useEffect(() => {
+    if (activeSessionId) return;
+    setMessages(initialMessages);
+  }, [activeSessionId, initialMessages]);
 
   const cacheKey = userId ? `chatCache:${userId}` : null;
   const loadMemoryCache = () => {
