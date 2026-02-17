@@ -20,9 +20,9 @@ const ProtectedRoute = ({ children }) => (
 
 function App() {
   const [language, setLanguage] = useState(() => {
-    if (typeof window === 'undefined') return 'tr';
+    if (typeof window === 'undefined') return 'en';
     const storedLanguage = window.localStorage.getItem('appLanguage');
-    return storedLanguage === 'en' || storedLanguage === 'tr' ? storedLanguage : 'tr';
+    return storedLanguage === 'en' || storedLanguage === 'tr' ? storedLanguage : 'en';
   });
 
   useEffect(() => {
