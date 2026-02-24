@@ -9,7 +9,6 @@ const content = {
     nav: {
       brand: 'Asylum Assistant',
       chat: 'Chat',
-      support: 'Buy Me Coffee',
       login: 'Log in',
       register: 'Register',
       logout: 'Log out',
@@ -95,7 +94,7 @@ const content = {
     ],
     footer: {
       links: ['Privacy Policy', 'Terms of Service', 'Full Disclaimer'],
-      supportLabel: 'Buy Me Coffee',
+      supportLabel: 'Support development',
       supportUrl: 'https://buymeacoffee.com/rojwebdesign',
       disclaimer:
         'Asylum Assistant is an informational tool designed to help users understand the UK asylum process. We are not a law firm and do not provide legal advice. Using this site does not create a solicitor-client relationship. For legal advice regarding your case, please consult a qualified immigration solicitor or OISC-registered advisor.',
@@ -111,7 +110,6 @@ const content = {
     nav: {
       brand: 'Asylum Assistant',
       chat: 'Sohbet',
-      support: 'Bir Kahve Al',
       login: 'Giriş yap',
       register: 'Kayıt ol',
       logout: 'Çıkış yap',
@@ -197,7 +195,7 @@ const content = {
     ],
     footer: {
       links: ['Gizlilik Politikası', 'Hizmet Şartları', 'Tüm Feragatname'],
-      supportLabel: 'Bir Kahve Al',
+      supportLabel: 'Gelistiriciyi destekle',
       supportUrl: 'https://buymeacoffee.com/rojwebdesign',
       disclaimer:
         'Asylum Assistant, kullanıcıların Birleşik Krallık iltica sürecini anlamalarına yardımcı olmak için tasarlanmış bilgi amaçlı bir araçtır. Bir hukuk bürosu değiliz ve hukuki tavsiye vermeyiz. Bu siteyi kullanmak avukat-müvekkil ilişkisi oluşturmaz. Özel durumun için nitelikli bir göçmenlik avukatına veya OISC kayıtlı bir danışmana başvur.',
@@ -238,15 +236,6 @@ const Home = ({ language = 'en', setLanguage = () => {} }) => {
             </span>
             {t.nav.brand}
           </Link>
-
-          <a
-            href={t.footer.supportUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="absolute left-1/2 hidden -translate-x-1/2 rounded-full border-2 border-amber-300 bg-amber-300 px-6 py-2.5 text-base font-extrabold text-amber-950 shadow-[0_10px_24px_-10px_rgba(252,211,77,0.95)] transition hover:scale-[1.03] hover:bg-amber-200 sm:inline-flex"
-          >
-            {t.nav.support}
-          </a>
 
           <div className="flex items-center gap-3">
             <button
@@ -368,15 +357,6 @@ const Home = ({ language = 'en', setLanguage = () => {} }) => {
               >
                 {t.nav.chat}
               </Link>
-              <a
-                href={t.footer.supportUrl}
-                target="_blank"
-                rel="noreferrer"
-                onClick={() => setMobileMenuOpen(false)}
-                className="block rounded-xl bg-amber-200 px-3 py-2 text-sm font-semibold text-amber-900 shadow-sm transition hover:bg-amber-300"
-              >
-                {t.nav.support}
-              </a>
               <SignedIn>
                 <div className="flex items-center gap-3 rounded-xl border border-[#2a2d36] bg-[#151821] px-3 py-2">
                   <UserButton appearance={{ elements: { avatarBox: 'h-10 w-10' } }} afterSignOutUrl="/" />
@@ -462,14 +442,6 @@ const Home = ({ language = 'en', setLanguage = () => {} }) => {
               className="inline-flex items-center justify-center rounded-full border border-[#2a2d36] bg-[#151821] px-6 py-3 text-base font-semibold text-slate-200 shadow-sm transition hover:-translate-y-0.5 hover:border-[#3a3d47] hover:shadow"
             >
               {t.hero.secondaryCta}
-            </a>
-            <a
-              href={t.footer.supportUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center justify-center rounded-full border-2 border-amber-300 bg-amber-300 px-6 py-3 text-base font-extrabold text-amber-950 shadow-[0_10px_24px_-10px_rgba(252,211,77,0.95)] transition hover:scale-[1.03] hover:bg-amber-200 sm:hidden"
-            >
-              {t.nav.support}
             </a>
           </div>
           <p className="mt-6 flex items-center justify-center gap-2 text-xs font-medium text-slate-400">
